@@ -1,18 +1,6 @@
 
 import random
-from constraint import ExactSumConstraint, Problem, AllDifferentConstraint
-
-# Constraint	Abstract base class for constraints
-# FunctionConstraint	Constraint which wraps a function defining the constraint logic
-# AllDifferentConstraint	Constraint enforcing that values of all given variables are different
-# AllEqualConstraint	Constraint enforcing that values of all given variables are equal
-# MaxSumConstraint	Constraint enforcing that values of given variables sum up to a given amount
-# ExactSumConstraint	Constraint enforcing that values of given variables sum exactly to a given amount
-# MinSumConstraint	Constraint enforcing that values of given variables sum at least to a given amount
-# InSetConstraint	Constraint enforcing that values of given variables are present in the given set
-# NotInSetConstraint	Constraint enforcing that values of given variables are not present in the given set
-# SomeInSetConstraint	Constraint enforcing that at least some of the values of given variables must be present in a given set
-# SomeNotInSetConstraint	Constraint enforcing that at least some of the values of given variables must not be present in a given set
+from constraint import ExactSumConstraint, MinConflictsSolver, Problem, AllDifferentConstraint
 
 def more_than(a, b):
     return a > b
@@ -33,37 +21,60 @@ def skyscraper_x(y):
             max_seen = i  
     return x  # visibility count
 
-# print(calculate_x([1, 3, 2, 4, 5, 9, 7, 6, 8]))  # Expected output: 5
-# print(calculate_x([9, 8, 7, 6, 5, 4, 3, 2, 1]))  # Expected output: 1
-# print(calculate_x([5, 2, 1, 6, 3, 9, 4, 7, 8]))  # Expected output: 3
+# print(skyscraper_x([1, 3, 2, 4, 5, 9, 7, 6, 8]))  # Expected output: 5
+# print(skyscraper_x([9, 8, 7, 6, 5, 4, 3, 2, 1]))  # Expected output: 1
+# print(skyscraper_x([5, 2, 1, 6, 3, 9, 4, 7, 8]))  # Expected output: 3
 
-def skyscraper_1(a, b, c, d, e, f, g, h, i):
-    return skyscraper_x([a, b, c, d, e, f, g, h, i]) == 1
+def skyscraper_1(*args):
+    return skyscraper_x(list(args)) == 1
 
-def skyscraper_2(a, b, c, d, e, f, g, h, i):
-    return skyscraper_x([a, b, c, d, e, f, g, h, i]) == 2
+def skyscraper_2(*args):
+    return skyscraper_x(list(args)) == 2
 
-def skyscraper_3(a, b, c, d, e, f, g, h, i):
-    return skyscraper_x([a, b, c, d, e, f, g, h, i]) == 3
+def skyscraper_3(*args):
+    return skyscraper_x(list(args)) == 3
 
-def skyscraper_4(a, b, c, d, e, f, g, h, i):
-    return skyscraper_x([a, b, c, d, e, f, g, h, i]) == 4
+def skyscraper_less_than_3(*args):
+    return skyscraper_x(list(args)) < 3
 
-def skyscraper_5(a, b, c, d, e, f, g, h, i):
-    return skyscraper_x([a, b, c, d, e, f, g, h, i]) == 5
+def skyscraper_more_than_3(*args):
+    return skyscraper_x(list(args)) > 3
 
-def skyscraper_6(a, b, c, d, e, f, g, h, i):
-    return skyscraper_x([a, b, c, d, e, f, g, h, i]) == 6
+def skyscraper_4(*args):
+    return skyscraper_x(list(args)) == 4
 
-def skyscraper_7(a, b, c, d, e, f, g, h, i):
-    return skyscraper_x([a, b, c, d, e, f, g, h, i]) == 7
+def skyscraper_less_than_4(*args):
+    return skyscraper_x(list(args)) < 4
 
-def skyscraper_8(a, b, c, d, e, f, g, h, i):
-    return skyscraper_x([a, b, c, d, e, f, g, h, i]) == 8
+def skyscraper_more_than_4(*args):
+    return skyscraper_x(list(args)) > 4
 
-def skyscraper_9(a, b, c, d, e, f, g, h, i):
-    return skyscraper_x([a, b, c, d, e, f, g, h, i]) == 9
+def skyscraper_5(*args):
+    return skyscraper_x(list(args)) == 5
 
+def skyscraper_less_than_5(*args):
+    return skyscraper_x(list(args)) < 5
+
+def skyscraper_more_than_5(*args):
+    return skyscraper_x(list(args)) > 5
+
+def skyscraper_6(*args):
+    return skyscraper_x(list(args)) == 6
+
+def skyscraper_less_than_6(*args):
+    return skyscraper_x(list(args)) < 6
+
+def skyscraper_more_than_6(*args):
+    return skyscraper_x(list(args)) > 6
+
+def skyscraper_7(*args):
+    return skyscraper_x(list(args)) == 7
+
+def skyscraper_8(*args):
+    return skyscraper_x(list(args)) == 8
+
+def skyscraper_9(*args):
+    return skyscraper_x(list(args)) == 9
 
 # =================================================================================================
 # Initialize
@@ -127,6 +138,10 @@ def initialize_problem(problem):
     # Each diagonal has different values
     # problem.addConstraint(AllDifferentConstraint(), ["a1", "b2", "c3", "d4", "e5", "f6", "g7", "h8", "i9"])
     # problem.addConstraint(AllDifferentConstraint(), ["a9", "b8", "c7", "d6", "e5", "f4", "g3", "h2", "i1"])
+    # problem.addConstraint(AllDifferentConstraint(), ["a3", "b4", "c5", "d6", "e7", "f8", "g9"])
+    # problem.addConstraint(AllDifferentConstraint(), ["a7", "b6", "c5", "d4", "e3", "f2", "g1"])
+    # problem.addConstraint(AllDifferentConstraint(), ["c1", "d2", "e3", "f4", "g5", "h6", "i7"])
+    # problem.addConstraint(AllDifferentConstraint(), ["c9", "d8", "e7", "f6", "g5", "h4", "i3"])
 
     # Some example constraints
 
@@ -142,9 +157,41 @@ def initialize_problem(problem):
 
     # Constraint: consecutive cells
     # problem.addConstraint(
-    #     lambda val1, val2 : abs(val1 - val2) == 1, ["a1", "b1"]
+    #     lambda val1, val2 : abs(val1 - val2) == 1, ["b2", "c2"]
     # )
-
+    # problem.addConstraint(
+    #     lambda val1, val2 : abs(val1 - val2) == 1, ["b3", "c3"]
+    # )
+    # problem.addConstraint(
+    #     lambda val1, val2 : abs(val1 - val2) == 1, ["b4", "c4"]
+    # )
+    # problem.addConstraint(
+    #     lambda val1, val2 : abs(val1 - val2) == 1, ["g6", "h6"]
+    # )
+    # problem.addConstraint(
+    #     lambda val1, val2 : abs(val1 - val2) == 1, ["g7", "h7"]
+    # )
+    # problem.addConstraint(
+    #     lambda val1, val2 : abs(val1 - val2) == 1, ["g8", "h8"]
+    # )
+    # problem.addConstraint(
+    #     lambda val1, val2 : abs(val1 - val2) == 1, ["b7", "b8"]
+    # )
+    # problem.addConstraint(
+    #     lambda val1, val2 : abs(val1 - val2) == 1, ["c7", "c8"]
+    # )
+    # problem.addConstraint(
+    #     lambda val1, val2 : abs(val1 - val2) == 1, ["d7", "d8"]
+    # )
+    # problem.addConstraint(
+    #     lambda val1, val2 : abs(val1 - val2) == 1, ["h2", "h3"]
+    # )
+    # problem.addConstraint(
+    #     lambda val1, val2 : abs(val1 - val2) == 1, ["g2", "g3"]
+    # )
+    # problem.addConstraint(
+    #     lambda val1, val2 : abs(val1 - val2) == 1, ["f2", "f3"]
+    # )
     # Constraint: sum exactly to certain value, killer sudoku
     # problem.addConstraint(ExactSumConstraint(24), ["c1", "c2", "d1", "d2"])
 
@@ -152,11 +199,31 @@ def initialize_problem(problem):
     # problem.addConstraint(is_even, ["i9"])
 
     # Constraint: skyscraper row/column/diagonal, skyscraper sudoku
-    # working correctly
+    # working correctly, extremely slow, may takes years or decades to run.
     # problem.addConstraint(
-    #     skyscraper_3, ["a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2", "i2"]
+    #     skyscraper_less_than_4, ["a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3", "i3"]
     # )
-
+    # problem.addConstraint(
+    #     skyscraper_less_than_4, ["a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4", "i4"]
+    # )
+    # problem.addConstraint(
+    #     skyscraper_less_than_4, ["c9", "c8", "c7", "c6", "c5", "c4", "c3", "c2", "c1"]
+    # )
+    # problem.addConstraint(
+    #     skyscraper_less_than_4, ["d9", "d8", "d7", "d6", "d5", "d4", "d3", "d2", "d1"]
+    # )
+    # problem.addConstraint(
+    #     skyscraper_less_than_4, ["i7", "h7", "g7", "f7", "e7", "d7", "c7", "b7", "a7"]
+    # )
+    # problem.addConstraint(
+    #     skyscraper_less_than_4, ["i6", "h6", "g6", "f6", "e6", "d6", "c6", "b6", "a6"]
+    # )
+    # problem.addConstraint(
+    #     skyscraper_less_than_4, ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9"]
+    # )
+    # problem.addConstraint(
+    #     skyscraper_less_than_4, ["g1", "g2", "g3", "g4", "g5", "g6", "g7", "g8", "g9"]
+    # )
 # ==============================================================================
 # Solver
 
@@ -174,6 +241,30 @@ def solve_sudoku(get_one_solution=True):
         else:
             print("Number of solutions found: ", len(all_solutions))
         return all_solutions
+
+# Find all solutions and number of solutions and write to a log file
+def find_all_solutions_and_add_to_log_file(file_name="solutions.txt"):
+    all_solutions = solve_sudoku(get_one_solution=False)
+    if all_solutions is not None:
+        with open(file_name, "a") as f:
+            # f.write("Number of solutions found: " + str(len(all_solutions)) + "\n")
+            for solution in all_solutions:
+                f.write(str(solution) + "\n")
+                # f.write("-"*20 + "\n")
+    # else:
+    #     with open("log.txt", "a") as f:
+    #         f.write("No solutions found\n")
+
+# Find 1 solution and write to a log file
+def find_one_solution_and_add_to_log_file(file_name="solutions.txt"):
+    one_solution = solve_sudoku(get_one_solution=True)
+    if one_solution is not None:
+        with open(file_name, "a") as f:
+            f.write(str(one_solution) + "\n")
+            # f.write("-"*20 + "\n")
+    # else:
+    #     with open("log.txt", "a") as f:
+    #         f.write("No solution found\n")
 
 #===============================================================================
 # Print
@@ -282,6 +373,7 @@ def populate_sudoku_with_cells(cell_list):
                     return False
         return True
 
+
     for cell in cell_list:
         row = ord(cell[0]) - 97
         col = int(cell[1:]) - 1
@@ -301,6 +393,63 @@ def populate_sudoku_with_cells(cell_list):
 
 # ==============================================================================
 # Generator
+
+# generate_puzzle_from_solution_data(24, get_log_file_line(1))
+def generate_puzzle_from_solution_data(amount, solution_data):
+    cell_values = list(solution_data.items())
+    random.shuffle(cell_values)
+    cell_values = cell_values[:amount]
+    return cell_values
+
+def find_puzzle_with_generate_puzzle_from_solution_data(amount, loop=100):
+    solution_data = get_log_file_line(random.randint(1, 13685))
+    attempts = 0
+    solution_data_switch = 0
+    puzzle = generate_puzzle_from_solution_data(amount, solution_data)
+    assign_values(puzzle)
+    solution = solve_sudoku()
+    while solution is None:
+        attempts += 1
+        solution_data_switch += 1
+        puzzle = generate_puzzle_from_solution_data(amount, solution_data)
+        assign_values(puzzle)
+        solution = solve_sudoku()
+        if solution_data_switch > loop:
+            solution_data_switch = 0
+            solution_data = get_log_file_line(random.randint(1, 13685))
+            print("Switched solution data")
+    # print("Solution: ")
+    # print_solution(solution)
+    # print("\nPuzzle: ")
+    # print_puzzle(puzzle) 
+    # print("\nAttempts: ")
+    # print(attempts)
+    return solution, puzzle, attempts
+
+def find_puzzle_with_generate_puzzle_from_solution_data_with_unique_solution(amount, loop=100):
+    solution_data = get_log_file_line(random.randint(1, 13685))
+    attempts = 0
+    solution_data_switch = 0
+    puzzle = generate_puzzle_from_solution_data(amount, solution_data)
+    assign_values(puzzle)
+    solutions = solve_sudoku(get_one_solution=False)
+    while len(solutions) != 1:
+        attempts += 1
+        solution_data_switch += 1
+        puzzle = generate_puzzle_from_solution_data(amount, solution_data)
+        assign_values(puzzle)
+        solutions = solve_sudoku(get_one_solution=False)
+        if solution_data_switch > loop:
+            solution_data_switch = 0
+            solution_data = get_log_file_line(random.randint(1, 13685))
+            print("Switched solution data")
+    # print("Solution: ")
+    # print_solution(solutions[0])
+    # print("\nPuzzle: ")
+    # print_puzzle(puzzle) 
+    # print("\nAttempts: ")
+    # print(attempts)
+    return solutions[0], puzzle, attempts
 
 def assign_value(cell, value):
     problem.addConstraint(
@@ -397,9 +546,26 @@ def find_puzzle_with_unique_solution_and_print(amount=24):
     print("\nAttempts: ")
     print(z)
 
+# return certain line of the log file, should be a dict
+def get_log_file_line(line_number, file_name="solutions.txt"):
+    with open(file_name, "r") as f:
+        lines = f.readlines()
+        return eval(lines[line_number - 1])
+
+def create_sudoku_database(loop, file_name, add_all_solutions=False):
+    for i in range(0, loop):
+        puzzle = populate_sudoku(random.randint(18, 30))
+        assign_values(puzzle)
+        if not add_all_solutions:
+            find_one_solution_and_add_to_log_file(file_name)
+        else:
+            find_all_solutions_and_add_to_log_file(file_name)
+
 def main():
     find_puzzle_with_given_cells_with_at_least_one_solution_and_print(["a1", "a2", "d7"])
     # find_puzzle_with_unique_solution_and_print(18)
+    # find_puzzle_with_at_least_one_solution_and_print(0)
+    # find_puzzle_with_generate_puzzle_from_solution_data(32)
     
 if __name__ == "__main__":
     main()

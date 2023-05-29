@@ -69,8 +69,14 @@ def set_input_values_with_puzzle_list(puzzle):
     for cell_id, value in puzzle:
         set_input_value(cell_id, str(value))
 
-def generate_puzzle_with_at_least_one_solution(amount=24):
-    x, y, z = find_puzzle_with_at_least_one_solution(amount)
+def dict_to_list(d):
+    return [(k, v) for k, v in d.items()]
+
+def generate_puzzle_with_at_least_one_solution(amount=24, from_database=False):
+    if not from_database:
+        x, y, z = find_puzzle_with_at_least_one_solution(amount)
+    else:
+        x, y, z = find_puzzle_with_generate_puzzle_from_solution_data(amount)
     print("Solution: ")
     print_solution(x)
     global solution
@@ -81,8 +87,11 @@ def generate_puzzle_with_at_least_one_solution(amount=24):
     print(z)
     return y
 
-def generate_puzzle_with_unique_solution(amount=24):
-    x, y, z = find_puzzle_with_unique_solution(amount)
+def generate_puzzle_with_unique_solution(amount=24, from_database=False):
+    if not from_database:
+        x, y, z = find_puzzle_with_unique_solution(amount)
+    else:
+        x, y, z = find_puzzle_with_generate_puzzle_from_solution_data_with_unique_solution(amount)
     print("Solution: ")
     print_solution(x)
     global solution
@@ -118,23 +127,20 @@ def generate_puzzle_unique_solution_with_given(list_of_cells):
     return y
 
 # Buttons
-button1 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((200, 700), (300, 40)),
-                                      text='Generate puzzle with solution',
-                                      manager=ui_manager,
-                                      tool_tip_text = "Generate puzzle with at least 1 vaild solution")
-amount_entry_line = pygame_gui.elements.UITextEntryLine(pygame.Rect((110, 700), (70, 40)),
-                                                        ui_manager, placeholder_text="24",
+amount_entry_line = pygame_gui.elements.UITextEntryLine(pygame.Rect((110, 700), (200, 40)),
+                                                        ui_manager, placeholder_text="Amount : 27",
                                                         object_id=pygame_gui.core.ObjectID(class_id='@normal_text_entry_line',
                                                         object_id=''))
 amount_entry_line.set_text_length_limit(2)
 amount_entry_line.set_allowed_characters('numbers')
-amount_entry_line.set_tooltip("Amount of given cells to be filled in the puzzle")
+amount_entry_line.set_tooltip("Amount of given cells to be filled in the puzzle. Recommended amount is 27.")
 
 given_entry_line = pygame_gui.elements.UITextEntryLine(pygame.Rect((700, 100), (400, 40)),
-                                                        ui_manager, placeholder_text="['a1', 'a2']",
+                                                        ui_manager, placeholder_text="['a1']",
                                                         object_id=pygame_gui.core.ObjectID(class_id='@normal_text_entry_line',
                                                         object_id=''))
-given_entry_line.set_text_length_limit(100)
+given_entry_line.set_text("['a1', 'b2', 'c3', 'a4', 'b5', 'c6', 'a7', 'b8', 'c9', 'd1', 'e2', 'f3', 'd4', 'e5', 'f6', 'd7', 'e8', 'f9', 'g1', 'h2', 'i3', 'g4', 'h5', 'i6', 'g7', 'h8', 'i9']")
+given_entry_line.set_text_length_limit(200)
 given_entry_line.set_tooltip("List of cells to be given cells to be filled in the puzzle")
 
 button5 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 150), (400, 40)),
@@ -147,20 +153,43 @@ button6 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 200), (40
                                       manager=ui_manager,
                                       tool_tip_text = "Generate puzzle with a unique solution. Incorrect setup will take the program a long time to find a puzzle.")
 
-button6 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 250), (400, 40)),
+amount_entry_line2 = pygame_gui.elements.UITextEntryLine(pygame.Rect((700, 250), (200, 40)),
+                                                        ui_manager, placeholder_text="Amount : 32",
+                                                        object_id=pygame_gui.core.ObjectID(class_id='@normal_text_entry_line',
+                                                        object_id=''))
+amount_entry_line2.set_text_length_limit(2)
+amount_entry_line2.set_allowed_characters('numbers')
+amount_entry_line2.set_tooltip("Amount of given cells to be filled in the puzzle. Recommended amount is 32 and more.")
+
+button7 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 300), (400, 40)),
+                                      text='Generate with solution from database',
+                                      manager=ui_manager,
+                                      tool_tip_text = "Generate puzzle with at least 1 vaild solution")
+
+button8 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 350), (400, 40)),
+                                      text='Generate with unique solution from database',
+                                      manager=ui_manager,
+                                      tool_tip_text = "Generate puzzle with a unique solution. Incorrect setup will take the program a long time to find a puzzle.")
+
+button6 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 700), (400, 40)),
                                       text='Solve puzzle',
                                       manager=ui_manager,
                                       tool_tip_text = "Show a solution for the current puzzle.")
 
-button2 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((100, 750), (400, 40)),
-                                      text='Generate puzzle with a unique solution',
+button1 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((340, 700), (300, 40)),
+                                      text='Generate puzzle with solution',
+                                      manager=ui_manager,
+                                      tool_tip_text = "Generate puzzle with at least 1 vaild solution")
+
+button2 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((100, 750), (540, 40)),
+                                      text='Generate puzzle with a unique solution by random fill',
                                       manager=ui_manager,
                                       tool_tip_text = "Generate puzzle with a unique solution. Incorrect setup will take the program a long time to find a puzzle.")
-button3 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((520, 700), (120, 40)),
+button3 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 650), (400, 40)),
                                       text='Clear Board',
                                       manager=ui_manager,
                                       tool_tip_text = "Clear Board")
-button4 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((520, 750), (120, 40)),
+button4 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 750), (400, 40)),
                                       text='Quit',
                                       manager=ui_manager,
                                       tool_tip_text = "Quit")
@@ -178,21 +207,21 @@ while is_running:
             if event.ui_element.text == "Generate puzzle with solution":
                 reset_board()
                 if amount_entry_line.get_text() == "":
-                    set_input_values_with_puzzle_list(generate_puzzle_with_at_least_one_solution())
+                    set_input_values_with_puzzle_list(generate_puzzle_with_at_least_one_solution(amount=27))
                 else:
                     set_input_values_with_puzzle_list(generate_puzzle_with_at_least_one_solution(int(amount_entry_line.get_text())))
 
-            elif event.ui_element.text == "Generate puzzle with a unique solution":
+            elif event.ui_element.text == "Generate puzzle with a unique solution by random fill":
                 reset_board()
                 if amount_entry_line.get_text() == "":
-                    set_input_values_with_puzzle_list(generate_puzzle_with_unique_solution())
+                    set_input_values_with_puzzle_list(generate_puzzle_with_unique_solution(amount=27))
                 else:
                     set_input_values_with_puzzle_list(generate_puzzle_with_unique_solution(int(amount_entry_line.get_text())))
 
             elif event.ui_element.text == "Generate with solution with given cells":
                 reset_board()
                 if given_entry_line.get_text() == "":
-                    set_input_values_with_puzzle_list(generate_puzzle_at_least_one_solution_with_given(['a1', 'a2']))
+                    set_input_values_with_puzzle_list(generate_puzzle_at_least_one_solution_with_given(['a1', 'b2', 'c3', 'a4', 'b5', 'c6', 'a7', 'b8', 'c9', 'd1', 'e2', 'f3', 'd4', 'e5', 'f6', 'd7', 'e8', 'f9', 'g1', 'h2', 'i3', 'g4', 'h5', 'i6', 'g7', 'h8', 'i9']))
                 else:
                     try:
                         given_cells = eval(given_entry_line.get_text())
@@ -204,7 +233,7 @@ while is_running:
             elif event.ui_element.text == "Generate with unique solution with given cells":
                 reset_board()
                 if given_entry_line.get_text() == "":
-                    set_input_values_with_puzzle_list(generate_puzzle_unique_solution_with_given(['a1', 'a2']))
+                    set_input_values_with_puzzle_list(generate_puzzle_unique_solution_with_given(['a1', 'b2', 'c3', 'a4', 'b5', 'c6', 'a7', 'b8', 'c9', 'd1', 'e2', 'f3', 'd4', 'e5', 'f6', 'd7', 'e8', 'f9', 'g1', 'h2', 'i3', 'g4', 'h5', 'i6', 'g7', 'h8', 'i9']))
                 else:
                     try:
                         given_cells = eval(given_entry_line.get_text())
@@ -213,12 +242,28 @@ while is_running:
                     except Exception as e:
                         print(f"Invalid input: {e}")
 
+            elif event.ui_element.text == "Generate with solution from database":
+                reset_board()
+                if amount_entry_line2.get_text() == "":
+                    set_input_values_with_puzzle_list(generate_puzzle_with_at_least_one_solution(amount=32, from_database=True))
+                else:
+                    set_input_values_with_puzzle_list(generate_puzzle_with_at_least_one_solution(int(amount_entry_line2.get_text()), from_database=True))
+
+            elif event.ui_element.text == "Generate with unique solution from database":
+                reset_board()
+                if amount_entry_line2.get_text() == "":
+                    set_input_values_with_puzzle_list(generate_puzzle_with_unique_solution(amount=32, from_database=True))
+                else:
+                    set_input_values_with_puzzle_list(generate_puzzle_with_unique_solution(int(amount_entry_line2.get_text()), from_database=True))
+
             elif event.ui_element.text == "Clear Board":
                 reset_board()
                 solution = {}
+
             elif event.ui_element.text == "Solve puzzle":
                 reset_board()
                 set_input_values_with_solution_dict(solution)
+
             elif event.ui_element.text == "Quit":
                 is_running = False
         ui_manager.process_events(event)
