@@ -368,10 +368,14 @@ def populate_sudoku(amount):
     for _ in range(amount):
         while positions:
             row, col = positions.pop()
-            num = random.randint(1, 9)
-            if is_valid(board, row, col, num):
-                board[row][col] = num
-                break
+            for num in range(1, 10):  # Try all numbers from 1 to 9
+                if is_valid(board, row, col, num):
+                    board[row][col] = num
+                    break
+            else:
+                continue  # Continue if no valid number was found
+            break  # Break if a valid number was found and placed
+
 
     output = []
     for i in range(9):
@@ -409,10 +413,16 @@ def populate_sudoku_with_cells(cell_list):
     for cell in cell_list:
         row = ord(cell[0]) - 97
         col = int(cell[1:]) - 1
-        num = random.randint(1, 9)
-        while not is_valid(board, row, col, num):
-            num = random.randint(1, 9)
-        board[row][col] = num
+        
+        # Create a shuffled list of numbers 1-9
+        numbers = list(range(1, 10))
+        random.shuffle(numbers)
+        
+        for num in numbers:
+            if is_valid(board, row, col, num):
+                board[row][col] = num
+                break  # break the loop as soon as a valid number is found
+    
     
     output = []
     for i in range(9):
