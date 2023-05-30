@@ -401,6 +401,61 @@ def generate_puzzle_from_solution_data(amount, solution_data):
     cell_values = cell_values[:amount]
     return cell_values
 
+# cell_list_example = ["a1", "b5", "c9", "d4", "e2", "f7", "g6", "h3", "i8"]
+# solution_data_example = {'a5': 8, 'a9': 2, 'b1': 2, 'b2': 3, 'b6': 9, 'b7': 8, 'c1': 8, 'c5': 1, 'c9': 6, 'd1': 9, 'd7': 6, 'd8': 4, 'e1': 1, 'e2': 5, 'f4': 4, 'f6': 8, 'g7': 9, 'g9': 1, 'h5': 4, 'h7': 7, 'h8': 6, 'i3': 7, 'i6': 6, 'i9': 5, 'b9': 4, 'c7': 5, 'a7': 3, 'e7': 2, 'f7': 1, 'i7': 4, 'i1': 3, 'h1': 5, 'b8': 1, 'a8': 9, 'c8': 7, 'b3': 6, 'a1': 7, 'f1': 6, 'g1': 4, 'a2': 1, 'a3': 5, 'a4': 6, 'a6': 4, 'b4': 5, 'b5': 7, 'c2': 4, 'c3': 9, 'c4': 2, 'c6': 3, 'e6': 7, 'd4': 3, 'e4': 9, 'e5': 6, 'd3': 2, 'd5': 5, 'd6': 1, 'f2': 7, 'd2': 8, 'd9': 7, 'f3': 3, 'e3': 4, 'f5': 2, 'f8': 5, 'f9': 9, 'g3': 8, 'g4': 7, 'g5': 3, 'g8': 2, 'g2': 6, 'g6': 5, 'h3': 1, 'h4': 8, 'h6': 2, 'h2': 9, 'h9': 3, 'e9': 8, 'e8': 3, 'i2': 2, 'i4': 1, 'i5': 9, 'i8': 8}
+# return : [('a1', 7), ... ]
+def generate_puzzle_from_solution_data_cells(cell_list, solution_data):
+    # Initialize an empty list to store the puzzle data
+    cell_values = []
+
+    # Iterate over the cell_list
+    for cell in cell_list:
+        # Get the value of the current cell from the solution_data
+        value = solution_data.get(cell)
+
+        # Add the current cell and its value as a tuple to the puzzle list
+        cell_values.append((cell, value))
+        
+    # Return the puzzle list
+    return cell_values
+
+
+def find_puzzle_with_generate_puzzle_from_solution_data_cells(cell_list, loop=1, unique_solution=False):
+    solution_data = get_log_file_line(random.randint(1, 13685))
+    attempts = 0
+    solution_data_switch = 0
+    puzzle = generate_puzzle_from_solution_data_cells(cell_list, solution_data)
+    assign_values(puzzle)
+    
+    if unique_solution:
+        solutions = solve_sudoku(get_one_solution=False)
+        while len(solutions) != 1:
+            attempts += 1
+            solution_data_switch += 1
+            if solution_data_switch >= loop:
+                solution_data_switch = 0
+                solution_data = get_log_file_line(random.randint(1, 13685))
+                print("Switched solution data")
+            puzzle = generate_puzzle_from_solution_data_cells(cell_list, solution_data)
+            assign_values(puzzle)
+            solutions = solve_sudoku(get_one_solution=False)
+        return solutions[0], puzzle, attempts
+    else:
+        solution = solve_sudoku()
+        while solution is None:
+            attempts += 1
+            solution_data_switch += 1
+            if solution_data_switch >= loop:
+                solution_data_switch = 0
+                solution_data = get_log_file_line(random.randint(1, 13685))
+                print("Switched solution data")
+            puzzle = generate_puzzle_from_solution_data_cells(cell_list, solution_data)
+            assign_values(puzzle)
+            solution = solve_sudoku()
+        
+        return solution, puzzle, attempts
+
+
 def find_puzzle_with_generate_puzzle_from_solution_data(amount, loop=100):
     solution_data = get_log_file_line(random.randint(1, 13685))
     attempts = 0

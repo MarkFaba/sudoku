@@ -2,7 +2,7 @@ import pygame
 import pygame_gui
 import ctypes
 from sudoku_designer import *
-
+from pattern_generator import *
 
 # Disable windows app scaling 
 ctypes.windll.user32.SetProcessDPIAware()
@@ -102,8 +102,11 @@ def generate_puzzle_with_unique_solution(amount=24, from_database=False):
     print(z)
     return y
 
-def generate_puzzle_at_least_one_solution_with_given(list_of_cells):
-    x, y, z = find_puzzle_with_given_cells_with_at_least_one_solution(list_of_cells)
+def generate_puzzle_at_least_one_solution_with_given(list_of_cells, from_database=False):
+    if not from_database:
+        x, y, z = find_puzzle_with_given_cells_with_at_least_one_solution(list_of_cells)
+    else:
+        x, y, z = find_puzzle_with_generate_puzzle_from_solution_data_cells(list_of_cells, unique_solution=False)
     print("Solution: ")
     print_solution(x)
     global solution
@@ -114,8 +117,11 @@ def generate_puzzle_at_least_one_solution_with_given(list_of_cells):
     print(z)
     return y
 
-def generate_puzzle_unique_solution_with_given(list_of_cells):
-    x, y, z = find_puzzle_with_given_cells_with_unique_solution(list_of_cells)
+def generate_puzzle_unique_solution_with_given(list_of_cells, from_database=False):
+    if not from_database:
+        x, y, z = find_puzzle_with_given_cells_with_unique_solution(list_of_cells)
+    else:
+        x, y, z = find_puzzle_with_generate_puzzle_from_solution_data_cells(list_of_cells, unique_solution=True)
     print("Solution: ")
     print_solution(x)
     global solution
@@ -152,27 +158,29 @@ button6 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 200), (40
                                       text='Generate with unique solution with given cells',
                                       manager=ui_manager,
                                       tool_tip_text = "Generate puzzle with a unique solution. Incorrect setup will take the program a long time to find a puzzle.")
+button7 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 250), (400, 40)),
+                                      text='Generate symmetric given cells',
+                                      manager=ui_manager,
+                                      tool_tip_text = "Generate random list of symmetric given cells")
 
-amount_entry_line2 = pygame_gui.elements.UITextEntryLine(pygame.Rect((700, 250), (200, 40)),
-                                                        ui_manager, placeholder_text="Amount : 32",
+
+# Database entry line
+database_entry_line = pygame_gui.elements.UITextEntryLine(pygame.Rect((700, 350), (400, 40)),
+                                                        ui_manager, placeholder_text="solutions.txt",
                                                         object_id=pygame_gui.core.ObjectID(class_id='@normal_text_entry_line',
                                                         object_id=''))
-amount_entry_line2.set_text_length_limit(2)
-amount_entry_line2.set_allowed_characters('numbers')
-amount_entry_line2.set_tooltip("Amount of given cells to be filled in the puzzle. Recommended amount is 32 and more.")
+database_entry_line.set_text_length_limit(300)
+database_entry_line.set_tooltip("The database used to generate puzzles.")
 
-button7 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 300), (400, 40)),
-                                      text='Generate with solution from database',
-                                      manager=ui_manager,
-                                      tool_tip_text = "Generate puzzle with at least 1 vaild solution")
-
-button8 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 350), (400, 40)),
-                                      text='Generate with unique solution from database',
-                                      manager=ui_manager,
-                                      tool_tip_text = "Generate puzzle with a unique solution. Incorrect setup will take the program a long time to find a puzzle.")
+# Drop down menu
+random_or_database_dropdown = pygame_gui.elements.UIDropDownMenu(["Generation Method : Random Fill", "Generation Method : Database"],
+                                                        "Generation Method : Random Fill",
+                                                        pygame.Rect((700, 400), (400, 35)),
+                                                        ui_manager)
+# random_or_database_dropdown.selected_option()
 
 button6 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 700), (400, 40)),
-                                      text='Solve puzzle',
+                                      text='Show Solution',
                                       manager=ui_manager,
                                       tool_tip_text = "Show a solution for the current puzzle.")
 
@@ -206,61 +214,89 @@ while is_running:
 
             if event.ui_element.text == "Generate puzzle with solution":
                 reset_board()
-                if amount_entry_line.get_text() == "":
-                    set_input_values_with_puzzle_list(generate_puzzle_with_at_least_one_solution(amount=27))
-                else:
-                    set_input_values_with_puzzle_list(generate_puzzle_with_at_least_one_solution(int(amount_entry_line.get_text())))
+                if random_or_database_dropdown.selected_option == "Generation Method : Random Fill":
+                    if amount_entry_line.get_text() == "":
+                        set_input_values_with_puzzle_list(generate_puzzle_with_at_least_one_solution(amount=27))
+                    else:
+                        set_input_values_with_puzzle_list(generate_puzzle_with_at_least_one_solution(int(amount_entry_line.get_text())))
+
+                elif random_or_database_dropdown.selected_option == "Generation Method : Database":
+                    if amount_entry_line.get_text() == "":
+                        set_input_values_with_puzzle_list(generate_puzzle_with_at_least_one_solution(amount=27, from_database=True))
+                    else:
+                        set_input_values_with_puzzle_list(generate_puzzle_with_at_least_one_solution(int(amount_entry_line.get_text()), from_database=True))
 
             elif event.ui_element.text == "Generate puzzle with a unique solution by random fill":
                 reset_board()
-                if amount_entry_line.get_text() == "":
-                    set_input_values_with_puzzle_list(generate_puzzle_with_unique_solution(amount=27))
-                else:
-                    set_input_values_with_puzzle_list(generate_puzzle_with_unique_solution(int(amount_entry_line.get_text())))
+                if random_or_database_dropdown.selected_option == "Generation Method : Random Fill":
+                    if amount_entry_line.get_text() == "":
+                        set_input_values_with_puzzle_list(generate_puzzle_with_unique_solution(amount=27))
+                    else:
+                        set_input_values_with_puzzle_list(generate_puzzle_with_unique_solution(int(amount_entry_line.get_text())))
+
+                elif random_or_database_dropdown.selected_option == "Generation Method : Database":
+                    if amount_entry_line.get_text() == "":
+                        set_input_values_with_puzzle_list(generate_puzzle_with_unique_solution(amount=27, from_database=True))
+                    else:
+                        set_input_values_with_puzzle_list(generate_puzzle_with_unique_solution(int(amount_entry_line.get_text()), from_database=True))
 
             elif event.ui_element.text == "Generate with solution with given cells":
                 reset_board()
-                if given_entry_line.get_text() == "":
-                    set_input_values_with_puzzle_list(generate_puzzle_at_least_one_solution_with_given(['a1', 'b2', 'c3', 'a4', 'b5', 'c6', 'a7', 'b8', 'c9', 'd1', 'e2', 'f3', 'd4', 'e5', 'f6', 'd7', 'e8', 'f9', 'g1', 'h2', 'i3', 'g4', 'h5', 'i6', 'g7', 'h8', 'i9']))
-                else:
-                    try:
-                        given_cells = eval(given_entry_line.get_text())
-                        if isinstance(given_cells, list):
-                            set_input_values_with_puzzle_list(generate_puzzle_at_least_one_solution_with_given(given_cells))
-                    except Exception as e:
-                        print(f"Invalid input: {e}")
+                if random_or_database_dropdown.selected_option == "Generation Method : Random Fill":
+                    if given_entry_line.get_text() == "":
+                        set_input_values_with_puzzle_list(generate_puzzle_at_least_one_solution_with_given(['a1', 'b2', 'c3', 'a4', 'b5', 'c6', 'a7', 'b8', 'c9', 'd1', 'e2', 'f3', 'd4', 'e5', 'f6', 'd7', 'e8', 'f9', 'g1', 'h2', 'i3', 'g4', 'h5', 'i6', 'g7', 'h8', 'i9']))
+                    else:
+                        try:
+                            given_cells = eval(given_entry_line.get_text())
+                            if isinstance(given_cells, list):
+                                set_input_values_with_puzzle_list(generate_puzzle_at_least_one_solution_with_given(given_cells))
+                        except Exception as e:
+                            print(f"Invalid input: {e}")
+                elif random_or_database_dropdown.selected_option == "Generation Method : Database":
+                    if given_entry_line.get_text() == "":
+                        set_input_values_with_puzzle_list(generate_puzzle_at_least_one_solution_with_given(['a1', 'b2', 'c3', 'a4', 'b5', 'c6', 'a7', 'b8', 'c9', 'd1', 'e2', 'f3', 'd4', 'e5', 'f6', 'd7', 'e8', 'f9', 'g1', 'h2', 'i3', 'g4', 'h5', 'i6', 'g7', 'h8', 'i9'], from_database=True))
+                    else:
+                        try:
+                            given_cells = eval(given_entry_line.get_text())
+                            if isinstance(given_cells, list):
+                                set_input_values_with_puzzle_list(generate_puzzle_at_least_one_solution_with_given(given_cells, from_database=True))
+                        except Exception as e:
+                            print(f"Invalid input: {e}")
 
             elif event.ui_element.text == "Generate with unique solution with given cells":
                 reset_board()
-                if given_entry_line.get_text() == "":
-                    set_input_values_with_puzzle_list(generate_puzzle_unique_solution_with_given(['a1', 'b2', 'c3', 'a4', 'b5', 'c6', 'a7', 'b8', 'c9', 'd1', 'e2', 'f3', 'd4', 'e5', 'f6', 'd7', 'e8', 'f9', 'g1', 'h2', 'i3', 'g4', 'h5', 'i6', 'g7', 'h8', 'i9']))
+                if random_or_database_dropdown.selected_option == "Generation Method : Random Fill":
+                    if given_entry_line.get_text() == "":
+                        set_input_values_with_puzzle_list(generate_puzzle_unique_solution_with_given(['a1', 'b2', 'c3', 'a4', 'b5', 'c6', 'a7', 'b8', 'c9', 'd1', 'e2', 'f3', 'd4', 'e5', 'f6', 'd7', 'e8', 'f9', 'g1', 'h2', 'i3', 'g4', 'h5', 'i6', 'g7', 'h8', 'i9']))
+                    else:
+                        try:
+                            given_cells = eval(given_entry_line.get_text())
+                            if isinstance(given_cells, list):
+                                set_input_values_with_puzzle_list(generate_puzzle_unique_solution_with_given(given_cells))
+                        except Exception as e:
+                            print(f"Invalid input: {e}")
+                elif random_or_database_dropdown.selected_option == "Generation Method : Database":
+                    if given_entry_line.get_text() == "":
+                        set_input_values_with_puzzle_list(generate_puzzle_unique_solution_with_given(['a1', 'b2', 'c3', 'a4', 'b5', 'c6', 'a7', 'b8', 'c9', 'd1', 'e2', 'f3', 'd4', 'e5', 'f6', 'd7', 'e8', 'f9', 'g1', 'h2', 'i3', 'g4', 'h5', 'i6', 'g7', 'h8', 'i9'], from_database=True))
+                    else:
+                        try:
+                            given_cells = eval(given_entry_line.get_text())
+                            if isinstance(given_cells, list):
+                                set_input_values_with_puzzle_list(generate_puzzle_unique_solution_with_given(given_cells, from_database=True))
+                        except Exception as e:
+                            print(f"Invalid input: {e}")
+            elif event.ui_element.text == "Generate symmetric given cells":
+                if amount_entry_line.get_text() == "":
+                    amount = 9
                 else:
-                    try:
-                        given_cells = eval(given_entry_line.get_text())
-                        if isinstance(given_cells, list):
-                            set_input_values_with_puzzle_list(generate_puzzle_unique_solution_with_given(given_cells))
-                    except Exception as e:
-                        print(f"Invalid input: {e}")
-
-            elif event.ui_element.text == "Generate with solution from database":
-                reset_board()
-                if amount_entry_line2.get_text() == "":
-                    set_input_values_with_puzzle_list(generate_puzzle_with_at_least_one_solution(amount=32, from_database=True))
-                else:
-                    set_input_values_with_puzzle_list(generate_puzzle_with_at_least_one_solution(int(amount_entry_line2.get_text()), from_database=True))
-
-            elif event.ui_element.text == "Generate with unique solution from database":
-                reset_board()
-                if amount_entry_line2.get_text() == "":
-                    set_input_values_with_puzzle_list(generate_puzzle_with_unique_solution(amount=32, from_database=True))
-                else:
-                    set_input_values_with_puzzle_list(generate_puzzle_with_unique_solution(int(amount_entry_line2.get_text()), from_database=True))
-
+                    amount = int(amount_entry_line.get_text()) * 0.5
+                    amount = int(amount)
+                given_entry_line.set_text(str(generate_symmetric_pattern_rotational(amount)))
             elif event.ui_element.text == "Clear Board":
                 reset_board()
                 solution = {}
 
-            elif event.ui_element.text == "Solve puzzle":
+            elif event.ui_element.text == "Show Solution":
                 reset_board()
                 set_input_values_with_solution_dict(solution)
 
