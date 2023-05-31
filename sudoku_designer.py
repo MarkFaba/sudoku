@@ -461,7 +461,7 @@ def generate_puzzle_from_solution_data_cells(cell_list, solution_data):
     # Return the puzzle list
     return cell_values
 
-def find_puzzle_with_generate_puzzle_from_solution_data_cells(cell_list, loop=1, unique_solution=False, file_name="solutions.txt"):
+def find_puzzle_with_generate_puzzle_from_solution_data_cells(cell_list, loop=1, unique_solution=False, file_name="solutions.txt", max_attempt=100):
     attempts = 0
     # Load the file and find out the index of the last line in file_name
     last_line_index = get_last_line_index(file_name)
@@ -474,6 +474,8 @@ def find_puzzle_with_generate_puzzle_from_solution_data_cells(cell_list, loop=1,
     if unique_solution:
         while not check_unique_solution():
             attempts += 1
+            if attempts > max_attempt:
+                return {}, [], attempts
             solution_data_switch += 1
             if solution_data_switch >= loop:
                 solution_data_switch = 0
@@ -487,6 +489,8 @@ def find_puzzle_with_generate_puzzle_from_solution_data_cells(cell_list, loop=1,
         solution = solve_sudoku()
         while solution is None:
             attempts += 1
+            if attempts > max_attempt:
+                return {}, [], attempts
             solution_data_switch += 1
             if solution_data_switch >= loop:
                 solution_data_switch = 0
@@ -499,7 +503,7 @@ def find_puzzle_with_generate_puzzle_from_solution_data_cells(cell_list, loop=1,
         return solution, puzzle, attempts
 
 
-def find_puzzle_with_generate_puzzle_from_solution_data(amount, loop=100, file_name="solutions.txt"):
+def find_puzzle_with_generate_puzzle_from_solution_data(amount, loop=100, file_name="solutions.txt", max_attempt=100):
     attempts = 0
     last_line_index = get_last_line_index(file_name)
     print(f"Last line index: {last_line_index}")
@@ -510,6 +514,8 @@ def find_puzzle_with_generate_puzzle_from_solution_data(amount, loop=100, file_n
     solution = solve_sudoku()
     while solution is None:
         attempts += 1
+        if attempts > max_attempt:
+            return {}, [], attempts
         solution_data_switch += 1
         puzzle = generate_puzzle_from_solution_data(amount, solution_data)
         assign_values(puzzle)
@@ -528,7 +534,7 @@ def find_puzzle_with_generate_puzzle_from_solution_data(amount, loop=100, file_n
     # print(attempts)
     return solution, puzzle, attempts
 
-def find_puzzle_with_generate_puzzle_from_solution_data_with_unique_solution(amount, loop=100, file_name="solutions.txt"):
+def find_puzzle_with_generate_puzzle_from_solution_data_with_unique_solution(amount, loop=100, file_name="solutions.txt", max_attempt=100):
     attempts = 0
     last_line_index = get_last_line_index(file_name)
     print(f"Last line index: {last_line_index}")
@@ -539,6 +545,8 @@ def find_puzzle_with_generate_puzzle_from_solution_data_with_unique_solution(amo
     solutions = solve_sudoku(get_one_solution=False)
     while not check_unique_solution():
         attempts += 1
+        if attempts > max_attempt:
+            return {}, [], attempts
         solution_data_switch += 1
         puzzle = generate_puzzle_from_solution_data(amount, solution_data)
         assign_values(puzzle)
@@ -568,24 +576,28 @@ def assign_values(cell_values):
     for cell, value in cell_values:
         assign_value(cell, value)
 
-def find_puzzle_with_given_cells_with_at_least_one_solution(cell_list):
+def find_puzzle_with_given_cells_with_at_least_one_solution(cell_list, max_attempt=100):
     attempts = 0
     puzzle = populate_sudoku_with_cells(cell_list)
     assign_values(puzzle)
     solution = solve_sudoku()
     while solution is None:
         attempts += 1
+        if attempts > max_attempt:
+            return {}, [], attempts
         puzzle = populate_sudoku_with_cells(cell_list)
         assign_values(puzzle)
         solution = solve_sudoku()
     return solution, puzzle, attempts
 
-def find_puzzle_with_given_cells_with_unique_solution(cell_list):
+def find_puzzle_with_given_cells_with_unique_solution(cell_list, max_attempt=100):
     attempts = 0
     puzzle = populate_sudoku_with_cells(cell_list)
     assign_values(puzzle)
     while not check_unique_solution():
         attempts += 1
+        if attempts > max_attempt:
+            return {}, [], attempts
         puzzle = populate_sudoku_with_cells(cell_list)
         assign_values(puzzle)
     solutions = solve_sudoku(get_one_solution=False)
@@ -609,24 +621,28 @@ def find_puzzle_with_given_cells_with_unique_solution_and_print(cell_list):
     print("\nAttempts: ")
     print(z)
 
-def find_puzzle_with_at_least_one_solution(amount=24):
+def find_puzzle_with_at_least_one_solution(amount=24, max_attempt=100):
     attempts = 0
     puzzle = populate_sudoku(amount)
     assign_values(puzzle)
     solution = solve_sudoku()
     while solution is None:
         attempts += 1
+        if attempts > max_attempt:
+            return {}, [], attempts
         puzzle = populate_sudoku(amount)
         assign_values(puzzle)
         solution = solve_sudoku()
     return solution, puzzle, attempts
 
-def find_puzzle_with_unique_solution(amount=24):
+def find_puzzle_with_unique_solution(amount=24, max_attempt=100):
     attempts = 0
     puzzle = populate_sudoku(amount)
     assign_values(puzzle)
     while not check_unique_solution():
         attempts += 1
+        if attempts > max_attempt:
+            return {}, [], attempts
         puzzle = populate_sudoku(amount)
         assign_values(puzzle)
     solutions = solve_sudoku(get_one_solution=False)

@@ -35,6 +35,7 @@ for i in range(grid_size+1):
 # Initialize cell dictionary to keep track of all cells
 cells = {}
 solution = {}
+current_puzzle = []
 # Loop through all grid rows and columns
 for i in range(grid_size):
     for j in range(grid_size):
@@ -77,61 +78,89 @@ def dict_to_list(d):
     return [(k, v) for k, v in d.items()]
 
 def generate_puzzle_with_at_least_one_solution(amount=24, from_database=False):
-    if not from_database:
-        x, y, z = find_puzzle_with_at_least_one_solution(amount)
+    if attempts_entry_line.get_text() == "":
+        attempt_max = 100
     else:
-        x, y, z = find_puzzle_with_generate_puzzle_from_solution_data(amount, file_name=database_entry_line.get_text())
+        attempt_max = int(attempts_entry_line.get_text())
+
+    if not from_database:
+        x, y, z = find_puzzle_with_at_least_one_solution(amount, attempt_max)
+    else:
+        x, y, z = find_puzzle_with_generate_puzzle_from_solution_data(amount, file_name=database_entry_line.get_text(), max_attempt=attempt_max)
     print("Solution: ")
     print_solution(x)
     global solution
     solution = x
     print("\nPuzzle: ")
-    print_puzzle(y) 
+    print_puzzle(y)
+    global current_puzzle
+    current_puzzle = y 
     print("\nAttempts: ")
     print(z)
     return y
 
 def generate_puzzle_with_unique_solution(amount=24, from_database=False):
-    if not from_database:
-        x, y, z = find_puzzle_with_unique_solution(amount)
+    if attempts_entry_line.get_text() == "":
+        attempt_max = 100
     else:
-        x, y, z = find_puzzle_with_generate_puzzle_from_solution_data_with_unique_solution(amount, file_name=database_entry_line.get_text())
+        attempt_max = int(attempts_entry_line.get_text())
+
+    if not from_database:
+        x, y, z = find_puzzle_with_unique_solution(amount, attempt_max)
+    else:
+        x, y, z = find_puzzle_with_generate_puzzle_from_solution_data_with_unique_solution(amount, file_name=database_entry_line.get_text(), max_attempt=attempt_max)
     print("Solution: ")
     print_solution(x)
     global solution
     solution = x
     print("\nPuzzle: ")
-    print_puzzle(y) 
+    print_puzzle(y)
+    global current_puzzle
+    current_puzzle = y  
     print("\nAttempts: ")
     print(z)
     return y
 
 def generate_puzzle_at_least_one_solution_with_given(list_of_cells, from_database=False):
-    if not from_database:
-        x, y, z = find_puzzle_with_given_cells_with_at_least_one_solution(list_of_cells)
+    if attempts_entry_line.get_text() == "":
+        attempt_max = 100
     else:
-        x, y, z = find_puzzle_with_generate_puzzle_from_solution_data_cells(list_of_cells, unique_solution=False, file_name=database_entry_line.get_text())
+        attempt_max = int(attempts_entry_line.get_text())
+
+    if not from_database:
+        x, y, z = find_puzzle_with_given_cells_with_at_least_one_solution(list_of_cells, max_attempt=attempt_max)
+    else:
+        x, y, z = find_puzzle_with_generate_puzzle_from_solution_data_cells(list_of_cells, unique_solution=False, file_name=database_entry_line.get_text(), max_attempt=attempt_max)
     print("Solution: ")
     print_solution(x)
     global solution
     solution = x
     print("\nPuzzle: ")
-    print_puzzle(y) 
+    print_puzzle(y)
+    global current_puzzle
+    current_puzzle = y   
     print("\nAttempts: ")
     print(z)
     return y
 
 def generate_puzzle_unique_solution_with_given(list_of_cells, from_database=False):
-    if not from_database:
-        x, y, z = find_puzzle_with_given_cells_with_unique_solution(list_of_cells)
+    if attempts_entry_line.get_text() == "":
+        attempt_max = 100
     else:
-        x, y, z = find_puzzle_with_generate_puzzle_from_solution_data_cells(list_of_cells, unique_solution=True, file_name=database_entry_line.get_text())
+        attempt_max = int(attempts_entry_line.get_text())
+
+    if not from_database:
+        x, y, z = find_puzzle_with_given_cells_with_unique_solution(list_of_cells, max_attempt=attempt_max)
+    else:
+        x, y, z = find_puzzle_with_generate_puzzle_from_solution_data_cells(list_of_cells, unique_solution=True, file_name=database_entry_line.get_text(), max_attempt=attempt_max)
     print("Solution: ")
     print_solution(x)
     global solution
     solution = x
     print("\nPuzzle: ")
-    print_puzzle(y) 
+    print_puzzle(y)
+    global current_puzzle
+    current_puzzle = y   
     print("\nAttempts: ")
     print(z)
     return y
@@ -153,13 +182,22 @@ given_entry_line.set_text("['a1', 'b2', 'c3', 'a4', 'b5', 'c6', 'a7', 'b8', 'c9'
 given_entry_line.set_text_length_limit(300)
 given_entry_line.set_tooltip("List of cells to be given cells to be filled in the puzzle")
 
+attempts_entry_line = pygame_gui.elements.UITextEntryLine(pygame.Rect((700, 400), (400, 40)),
+                                                        ui_manager, placeholder_text="Max attempts : 100",
+                                                        object_id=pygame_gui.core.ObjectID(class_id='@normal_text_entry_line',
+                                                        object_id=''))
+attempts_entry_line.set_text_length_limit(10)
+attempts_entry_line.set_allowed_characters('numbers')
+attempts_entry_line.set_tooltip("Max attempt to generate a puzzle. Recommended amount is 100.")
+
+
 button5 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 150), (400, 40)),
-                                      text='Generate with solution with given cells',
+                                      text='Generate with Solution with Given Cells',
                                       manager=ui_manager,
                                       tool_tip_text = "Generate puzzle with at least 1 vaild solution")
 
 button6 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 200), (400, 40)),
-                                      text='Generate with unique solution with given cells',
+                                      text='Generate with Unique Solution with Given Cells',
                                       manager=ui_manager,
                                       tool_tip_text = "Generate puzzle with a unique solution. Incorrect setup will take the program a long time to find a puzzle.")
 button7 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 250), (400, 40)),
@@ -185,25 +223,31 @@ random_or_database_dropdown = pygame_gui.elements.UIDropDownMenu(["Generation Me
                                                         ui_manager)
 # random_or_database_dropdown.selected_option()
 
-button6 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 700), (400, 40)),
+button1 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((340, 700), (300, 40)),
+                                      text='Generate Puzzle with Solution',
+                                      manager=ui_manager,
+                                      tool_tip_text = "Generate puzzle with at least 1 vaild solution with given amount.")
+
+button2 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((100, 750), (540, 40)),
+                                      text='Generate Puzzle with a Unique Solution with Given Amount',
+                                      manager=ui_manager,
+                                      tool_tip_text = "Generate puzzle with a unique solution with given amount. Incorrect setup will take the program a long time to find a puzzle.")
+button_clear_board = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 600), (400, 40)),
+                                      text='Clear Board',
+                                      manager=ui_manager,
+                                      tool_tip_text = "Clear Board")
+
+button_show_solution = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 650), (400, 40)),
                                       text='Show Solution',
                                       manager=ui_manager,
                                       tool_tip_text = "Show a solution for the current puzzle.")
 
-button1 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((340, 700), (300, 40)),
-                                      text='Generate puzzle with solution',
+button_show_puzzle = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 700), (400, 40)),
+                                      text='Show Puzzle',
                                       manager=ui_manager,
-                                      tool_tip_text = "Generate puzzle with at least 1 vaild solution")
+                                      tool_tip_text = "Show the current puzzle.")
 
-button2 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((100, 750), (540, 40)),
-                                      text='Generate puzzle with a unique solution by random fill',
-                                      manager=ui_manager,
-                                      tool_tip_text = "Generate puzzle with a unique solution. Incorrect setup will take the program a long time to find a puzzle.")
-button3 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 650), (400, 40)),
-                                      text='Clear Board',
-                                      manager=ui_manager,
-                                      tool_tip_text = "Clear Board")
-button4 = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 750), (400, 40)),
+button_quit = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((700, 750), (400, 40)),
                                       text='Quit',
                                       manager=ui_manager,
                                       tool_tip_text = "Quit")
@@ -218,7 +262,7 @@ while is_running:
             is_running = False
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
 
-            if event.ui_element.text == "Generate puzzle with solution":
+            if event.ui_element.text == "Generate Puzzle with Solution":
                 reset_board()
                 if random_or_database_dropdown.selected_option == "Generation Method : Random Fill":
                     if amount_entry_line.get_text() == "":
@@ -232,7 +276,7 @@ while is_running:
                     else:
                         set_input_values_with_puzzle_list(generate_puzzle_with_at_least_one_solution(int(amount_entry_line.get_text()), from_database=True))
 
-            elif event.ui_element.text == "Generate puzzle with a unique solution by random fill":
+            elif event.ui_element.text == "Generate Puzzle with a Unique Solution with Given Amount":
                 reset_board()
                 if random_or_database_dropdown.selected_option == "Generation Method : Random Fill":
                     if amount_entry_line.get_text() == "":
@@ -246,7 +290,7 @@ while is_running:
                     else:
                         set_input_values_with_puzzle_list(generate_puzzle_with_unique_solution(int(amount_entry_line.get_text()), from_database=True))
 
-            elif event.ui_element.text == "Generate with solution with given cells":
+            elif event.ui_element.text == "Generate with Solution with Given Cells":
                 reset_board()
                 if random_or_database_dropdown.selected_option == "Generation Method : Random Fill":
                     if given_entry_line.get_text() == "":
@@ -269,7 +313,7 @@ while is_running:
                         except Exception as e:
                             print(f"Invalid input: {e}")
 
-            elif event.ui_element.text == "Generate with unique solution with given cells":
+            elif event.ui_element.text == "Generate with Unique Solution with Given Cells":
                 reset_board()
                 if random_or_database_dropdown.selected_option == "Generation Method : Random Fill":
                     if given_entry_line.get_text() == "":
@@ -305,6 +349,10 @@ while is_running:
             elif event.ui_element.text == "Show Solution":
                 reset_board()
                 set_input_values_with_solution_dict(solution)
+
+            elif event.ui_element.text == "Show Puzzle":
+                reset_board()
+                set_input_values_with_puzzle_list(current_puzzle)
 
             elif event.ui_element.text == "Quit":
                 is_running = False
