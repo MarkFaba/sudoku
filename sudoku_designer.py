@@ -368,14 +368,12 @@ def populate_sudoku(amount):
     for _ in range(amount):
         while positions:
             row, col = positions.pop()
-            for num in range(1, 10):  # Try all numbers from 1 to 9
-                if is_valid(board, row, col, num):
-                    board[row][col] = num
-                    break
+            num = random.randint(1, 9)
+            if is_valid(board, row, col, num):
+                board[row][col] = num
+                break
             else:
-                continue  # Continue if no valid number was found
-            break  # Break if a valid number was found and placed
-
+                break
 
     output = []
     for i in range(9):
@@ -421,7 +419,9 @@ def populate_sudoku_with_cells(cell_list):
         for num in numbers:
             if is_valid(board, row, col, num):
                 board[row][col] = num
-                break  # break the loop as soon as a valid number is found
+                break  
+            else:
+                break  
     
     
     output = []
@@ -674,7 +674,9 @@ def get_log_file_line(line_number, file_name="solutions.txt"):
 
 def create_sudoku_database(loop, file_name, add_all_solutions=False):
     for i in range(0, loop):
-        puzzle = populate_sudoku(random.randint(18, 24))
+        # puzzle = populate_sudoku(random.randint(6, 10))
+        puzzle = populate_sudoku(6)
+        print_puzzle(puzzle)
         assign_values(puzzle)
         if not add_all_solutions:
             find_one_solution_and_add_to_log_file(file_name)
@@ -682,10 +684,10 @@ def create_sudoku_database(loop, file_name, add_all_solutions=False):
             find_all_solutions_and_add_to_log_file(file_name)
 
 def main():
-    # create_sudoku_database(80000, "solutions_classic_x.txt")
+    create_sudoku_database(500, "solutions_classic_x_large.txt", add_all_solutions=False)
     # find_puzzle_with_given_cells_with_at_least_one_solution_and_print(["a1", "a2", "d7"])
     # find_puzzle_with_unique_solution_and_print(18)
-    find_puzzle_with_at_least_one_solution_and_print(0)
+    # find_puzzle_with_at_least_one_solution_and_print(0)
     # find_puzzle_with_generate_puzzle_from_solution_data(32)
     
 if __name__ == "__main__":
