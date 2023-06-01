@@ -372,8 +372,6 @@ def populate_sudoku(amount):
             if is_valid(board, row, col, num):
                 board[row][col] = num
                 break
-            else:
-                break
 
     output = []
     for i in range(9):
@@ -420,9 +418,6 @@ def populate_sudoku_with_cells(cell_list):
             if is_valid(board, row, col, num):
                 board[row][col] = num
                 break  
-            else:
-                break  
-    
     
     output = []
     for i in range(9):
